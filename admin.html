@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Subarna Admin | Inventory Management</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f1f5f9; padding: 40px; display: flex; justify-content: center; }
+        .admin-card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+        h2 { color: #0f172a; text-align: center; margin-bottom: 25px; }
+        label { font-size: 14px; font-weight: 600; color: #64748b; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0 20px 0; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; }
+        .btn-upload { width: 100%; background: #1a73e8; color: white; border: none; padding: 14px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .btn-upload:hover { background: #1557b0; }
+        .nav-link { display: block; text-align: center; margin-top: 15px; color: #1a73e8; text-decoration: none; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="admin-card">
+    <h2>Add New Item 🧵</h2>
+    
+    <label>Product Name</label>
+    <input type="text" id="pName" placeholder="e.g. Handloom Jamdani Saree">
+    
+    <label>Price (in Paise - 100000 = ₹1000)</label>
+    <input type="number" id="pPrice" placeholder="150000">
+    
+    <label>Stock Count</label>
+    <input type="number" id="pStock" placeholder="10">
+    
+    <label>District Source</label>
+    <select id="pDistrict">
+        <option value="Nadia">Nadia</option>
+        <option value="Kolkata">Kolkata</option>
+        <option value="Hooghly">Hooghly</option>
+        <option value="Murshidabad">Murshidabad</option>
+    </select>
+    
+    <label>Image URL</label>
+    <input type="text" id="pImg" placeholder="https://link-to-your-photo.jpg">
+    
+    <button class="btn-upload" onclick="uploadProduct()">List Product Live</button>
+    <a href="index.html" class="nav-link">← View Public Shop</a>
+</div>
+
+<script>
+    const _supabase = supabase.createClient("YOUR_SUPABASE_URL", "YOUR_ANON_KEY");
+
+    async function uploadProduct() {
+        const payload = {
+            name: document.getElementById('pName').value,
+            price: parseInt(document.getElementById('pPrice').value),
+            stock_count: parseInt(document.getElementById('pStock').value),
+            image_url: document.getElementById('pImg').value,
+            district: document.getElementById('pDistrict').value,
+            created_at: new Date()
+        };
+
+        const { error } = await _supabase.from('products').insert([payload]);
+
+        if (error) {
+            alert("Error: " + error.message);
+        } else {
+            alert("Success! The item is now available for purchase.");
+            location.reload(); // Clear form for next item
+        }
+    }
+</script>
+</body>
+</html>
