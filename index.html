@@ -239,3 +239,38 @@
 
 </body>
 </html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        // Initialize the connection
+        const supabase = supabase.createClient('YOUR_SUPABASE_URL', 'YOUR_SUPABASE_KEY');
+
+        // Function: WhatsApp Login
+        function loginViaWhatsApp() {
+            const phone = document.getElementById('user-phone').value;
+            if(!phone) return alert("Please enter your phone number");
+
+            const tempID = "SUB-" + Math.floor(Math.random() * 1000000);
+            const myWhatsApp = "91YOURNUMBER"; // REPLACE THIS
+            const waMsg = `Verify me for Subarna Apparel. ID: ${tempID} Phone: ${phone}`;
+            
+            window.open(`https://wa.me/${myWhatsApp}?text=${encodeURIComponent(waMsg)}`, '_blank');
+
+            localStorage.setItem('subarna_user_id', phone);
+            alert("Verification started!");
+        }
+
+        // Function: Add to Cart
+        async function addToCart(productId) {
+            const userPhone = localStorage.getItem('subarna_user_id');
+            if (!userPhone) return alert("Please login via WhatsApp first!");
+
+            const { error } = await supabase
+                .from('user_carts')
+                .insert([{ phone_number: userPhone, product_id: productId, quantity: 1 }]);
+
+            if (!error) alert("Saree added to cart!");
+        }
+    </script>
+</body>
+</html>
