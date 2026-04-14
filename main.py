@@ -79,11 +79,12 @@ async def verify_payment(data: PaymentVerification):
 
 # 6. Server Start Logic
 if __name__ == "__main__":
-    print("""
-    *****************************************
-    * SUBARNA APPAREL BACKEND          *
-    * Status: Starting...              *
-    *****************************************
-    """)
-    # Running on 127.0.0.1 (Localhost) for development
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    import uvicorn
+    import os
+    print("🚀 SUBARNA APPAREL BACKEND STARTING...")
+    
+    # Render will provide a port, or we use 8000 as a backup
+    port = int(os.environ.get("PORT", 8000))
+    
+    # Use 0.0.0.0 to allow the cloud to see your app
+    uvicorn.run(app, host="0.0.0.0", port=port))
