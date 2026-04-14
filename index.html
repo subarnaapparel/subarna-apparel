@@ -10,55 +10,27 @@
 
     <style>
         :root { --primary: #1a73e8; --dark: #0f172a; --bg: #f8fafc; --success: #2ecc71; --whatsapp: #25D366; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 0; color: #334155; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 0; color: #334155; }
         
         /* Header */
         .header { text-align: center; padding: 40px 20px; background: white; border-bottom: 1px solid #e2e8f0; }
-        .leaf-logo { font-size: 50px; display: inline-block; animation: sway 3s ease-in-out infinite; }
-        @keyframes sway { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+        .leaf-logo { font-size: 50px; display: inline-block; animation: sway 3.5s ease-in-out infinite; }
+        @keyframes sway { 0%, 100% { transform: rotate(-10deg); } 50% { transform: rotate(10deg); } }
 
-        /* Auth Section - Ensuring visibility */
-        .auth-container { 
-            max-width: 450px; 
-            margin: 30px auto; 
-            padding: 25px; 
-            background: white; 
-            border-radius: 16px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
-            text-align: center;
-            border: 2px solid #e2e8f0;
-        }
-        .auth-input { 
-            width: 90%; 
-            padding: 12px; 
-            margin-bottom: 15px; 
-            border: 1px solid #cbd5e0; 
-            border-radius: 8px; 
-            font-size: 16px;
-        }
-        .wa-login-btn { 
-            background: var(--whatsapp); 
-            color: white; 
-            border: none; 
-            padding: 14px 25px; 
-            border-radius: 8px; 
-            font-weight: 700; 
-            cursor: pointer; 
-            width: 95%;
-            font-size: 16px;
-            display: block;
-            margin: 0 auto;
-        }
+        /* Login Box */
+        .auth-container { max-width: 400px; margin: 30px auto; padding: 25px; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; border: 1px solid #e2e8f0; }
+        .auth-input { width: 90%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 16px; outline: none; }
+        .wa-btn { background: var(--whatsapp); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; font-size: 16px; }
 
-        /* Product Grid */
+        /* Grid */
         #product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; max-width: 1200px; margin: 40px auto; padding: 0 20px; }
-        .card { background: white; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; transition: 0.3s; }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .card { background: white; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; display: flex; flex-direction: column; transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .image-box img { width: 100%; height: 250px; object-fit: cover; }
-        .content { padding: 20px; }
-        .price { font-size: 1.4rem; font-weight: 800; margin-bottom: 15px; }
+        .content { padding: 20px; flex-grow: 1; }
+        .price { font-size: 1.5rem; font-weight: 800; margin-bottom: 15px; color: var(--dark); }
         
-        .buy-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--dark); color: white; font-weight: 600; cursor: pointer; margin-bottom: 8px; }
+        .buy-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--dark); color: white; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
         .cart-btn { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--dark); background: white; color: var(--dark); font-weight: 600; cursor: pointer; }
     </style>
 </head>
@@ -66,64 +38,56 @@
 
 <div class="header">
     <div class="leaf-logo">🍁</div>
-    <h1 style="margin:10px 0 5px 0;">Subarna Apparel</h1>
-    <p>Handpicked Saree Collections from West Bengal</p>
+    <h1>Subarna Apparel</h1>
+    <p>Authentic Saree Collections from West Bengal</p>
 </div>
 
 <div class="auth-container">
-    <h3 style="margin-top:0;">Secure Login</h3>
-    <p style="font-size: 14px; color: #64748b;">Enter your phone to sync your cart across devices.</p>
-    <input type="text" id="user-phone" class="auth-input" placeholder="Phone Number (e.g. 98300...)">
-    <button onclick="loginViaWhatsApp()" class="wa-login-btn">
-        Verify via WhatsApp
-    </button>
+    <h3>Secure Login</h3>
+    <p style="font-size: 14px; color: #64748b; margin-bottom: 20px;">Verify via WhatsApp to save your cart.</p>
+    <input type="text" id="user-phone" class="auth-input" placeholder="Phone Number (e.g. 9830000000)">
+    <button onclick="loginViaWhatsApp()" class="wa-btn">Verify via WhatsApp</button>
 </div>
 
-<div id="product-grid">Loading Subarna Marketplace...</div>
+<div id="product-grid">Connecting to Subarna Marketplace...</div>
 
 <script>
     // 1. CONFIGURATION
     const SUPABASE_URL = "https://unzhgcjequbqblogktmc.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuemhnY2plcXVicWJsb2drdG1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MjA0NDcsImV4cCI6MjA5MTQ5NjQ0N30.cMl5AJAP686hfg7RPYlHgOcsYwPiadW-XqxYcne8sjs";
-    const VENDOR_WHATSAPP = "91XXXXXXXXXX"; // REPLACE WITH YOUR 10-DIGIT NUMBER
+    
+    // REPLACE THIS WITH YOUR 10-DIGIT NUMBER (must start with 91)
+    const VENDOR_WHATSAPP = "919732493810"; 
 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // 2. WHATSAPP LOGIN LOGIC
+    // 2. WHATSAPP REDIRECT LOGIC
     function loginViaWhatsApp() {
-    const phone = document.getElementById('user-phone').value;
-    if(!phone) {
-        alert("Please enter a phone number first.");
-        return;
+        const phone = document.getElementById('user-phone').value;
+        if(!phone || phone.length < 10) {
+            alert("Please enter a valid phone number.");
+            return;
+        }
+
+        const tempID = "SUB-" + Math.floor(Math.random() * 1000000);
+        const waMsg = `Verify me for Subarna Apparel. \nPhone: ${phone} \nID: ${tempID}`;
+        
+        // Save to browser memory
+        localStorage.setItem('subarna_user_id', phone);
+
+        // Redirect directly
+        const waUrl = `https://api.whatsapp.com/send?phone=${VENDOR_WHATSAPP}&text=${encodeURIComponent(waMsg)}`;
+        window.location.href = waUrl;
     }
 
-    // 1. ENSURE YOUR NUMBER IS CORRECT: 
-    // Must be 91 followed by 10 digits. NO spaces, NO plus (+) sign.
-    const myWhatsApp = "91XXXXXXXXXX"; // <-- CHECK THIS CAREFULLY
-
-    const tempID = "SUB-" + Math.floor(Math.random() * 1000000);
-    const waMsg = `Hello Subarna! Please verify my account. Phone: ${phone} ID: ${tempID}`;
-    
-    // 2. THE FIX: Using a direct URL variable
-    const finalUrl = `https://wa.me/${myWhatsApp}?text=${encodeURIComponent(waMsg)}`;
-    
-    // 3. FORCE OPEN: Some browsers block window.open, so we use this:
-    const link = document.createElement('a');
-    link.href = finalUrl;
-    link.target = '_blank';
-    link.click();
-
-    // Store phone locally
-    localStorage.setItem('subarna_user_id', phone);
-}
-    // 3. LOAD PRODUCTS
+    // 3. LOAD DATA FROM SUPABASE
     async function loadData() {
         const grid = document.getElementById('product-grid');
         try {
             const { data, error } = await _supabase.from('products').select('*').order('created_at', { ascending: false });
             if (error) throw error;
 
-            grid.innerHTML = data.length ? "" : "No products found.";
+            grid.innerHTML = data.length ? "" : "No products available.";
             data.forEach(item => {
                 grid.innerHTML += `
                     <div class="card">
@@ -132,24 +96,25 @@
                         </div>
                         <div class="content">
                             <h3 style="margin:0;">${item.name}</h3>
-                            <p style="color: #64748b; font-size: 14px;">${item.description || 'Traditional Bengal Wear'}</p>
+                            <p style="color: #64748b; font-size: 14px;">${item.description || 'Bengal Traditional wear'}</p>
                             <div class="price">₹${(item.price / 100).toLocaleString('en-IN')}</div>
                             
-                            <button class="buy-btn">Buy Now</button>
+                            <button class="buy-btn" onclick="alert('Proceeding to Secure Payment...')">Buy Now</button>
                             <button class="cart-btn" onclick="addToCart(${item.id})">Add to Cart</button>
                         </div>
                     </div>`;
             });
         } catch (err) {
-            grid.innerHTML = "Connection Error: " + err.message;
+            grid.innerHTML = "Error connecting: " + err.message;
         }
     }
 
-    // 4. CART LOGIC
+    // 4. ADD TO CART LOGIC
     async function addToCart(productId) {
         const userPhone = localStorage.getItem('subarna_user_id');
         if (!userPhone) {
-            alert("Please use the 'Verify via WhatsApp' section at the top to login first!");
+            alert("Please login via WhatsApp at the top first!");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
 
@@ -158,10 +123,10 @@
             .insert([{ phone_number: userPhone, product_id: productId, quantity: 1 }]);
 
         if (!error) {
-            alert("Saree added to your cloud cart!");
+            alert("Success! Saree added to your cloud cart.");
         } else {
             console.error(error);
-            alert("Could not add to cart. Please check your connection.");
+            alert("Cart Error: Ensure the 'user_carts' table exists in Supabase.");
         }
     }
 
