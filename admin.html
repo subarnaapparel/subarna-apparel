@@ -3,95 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subarna Admin - Dashboard</title>
+    <title>Subarna Admin - Manage Store</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f7fafc; margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .tabs { border-bottom: 2px solid #edf2f7; margin-bottom: 20px; }
-        .tab-btn { padding: 10px 20px; cursor: pointer; border: none; background: none; font-weight: 600; color: #718096; }
-        .tab-btn.active { color: #2d3748; border-bottom: 2px solid #2d3748; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .form-section { border-bottom: 2px solid #edf2f7; margin-bottom: 30px; padding-bottom: 20px; }
+        input { padding: 10px; margin: 5px; border: 1px solid #cbd5e0; border-radius: 6px; }
+        .btn-add { background: #48bb78; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; background: #edf2f7; padding: 12px; }
+        th { text-align: left; padding: 12px; background: #edf2f7; }
         td { padding: 12px; border-bottom: 1px solid #edf2f7; }
-        .hidden { display: none; }
-        #login-section { text-align: center; max-width: 400px; margin: 100px auto; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #cbd5e0; border-radius: 6px; }
-        .btn-main { background: #2d3748; color: white; padding: 12px; width: 100%; border-radius: 6px; cursor: pointer; border: none; }
+        .delete-btn { background: #e53e3e; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div id="login-section" class="container">
-    <h1 style="font-family: 'Playfair Display', serif;">Admin Login</h1>
-    <input type="password" id="passcode-input" placeholder="Enter Passcode">
-    <button class="btn-main" onclick="checkLogin()">Login</button>
-</div>
+<div class="container">
+    <h1 style="font-family: 'Playfair Display', serif;">Subarna Inventory Manager</h1>
 
-<div id="admin-content" class="container hidden">
-    <div style="display: flex; justify-content: space-between;">
-        <h1 style="font-family: 'Playfair Display', serif;">Subarna Manager</h1>
-        <button onclick="location.reload()" style="background:none; border:none; color:blue; cursor:pointer;">Logout</button>
+    <div class="form-section">
+        <h3>Add New Product</h3>
+        <input type="text" id="p-name" placeholder="Product Name (e.g. Silk Saree)">
+        <input type="text" id="p-price" placeholder="Price (e.g. 1200)">
+        <input type="text" id="p-img" placeholder="Image URL">
+        <button class="btn-add" onclick="addProduct()">Add to Shop</button>
     </div>
 
-    <div class="tabs">
-        <button class="tab-btn active" onclick="showTab('orders')">Orders</button>
-        <button class="tab-btn" onclick="showTab('products')">Products</button>
-    </div>
-
-    <div id="orders-tab">
-        <table>
-            <thead><tr><th>Customer</th><th>Product</th><th>Action</th></tr></thead>
-            <tbody id="orders-list"></tbody>
-        </table>
-    </div>
-
-    <div id="products-tab" class="hidden">
-        <table>
-            <thead><tr><th>Name</th><th>Price</th><th>Stock</th></tr></thead>
-            <tbody id="products-list"></tbody>
-        </table>
-    </div>
+    <h3>Customer Orders</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Customer</th>
+                <th>Product</th>
+                <th>Phone</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="orders-list"></tbody>
+    </table>
 </div>
 
 <script>
     const BACKEND_URL = "https://subarna-apparel.onrender.com";
-    const PASSCODE = "1234"; // 🟢 Change this!
 
-    function checkLogin() {
-        if (document.getElementById('passcode-input').value === PASSCODE) {
-            document.getElementById('login-section').classList.add('hidden');
-            document.getElementById('admin-content').classList.remove('hidden');
-            fetchData();
-        }
+    // 1. Function to Add Product
+    async function addProduct() {
+        const name = document.getElementById('p-name').value;
+        const price = document.getElementById('p-price').value;
+        const image = document.getElementById('p-img').value;
+
+        if(!name || !price) return alert("Please fill Name and Price");
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/products`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, price, image_url: image })
+            });
+            if(response.ok) {
+                alert("Product Added Successfully!");
+                location.reload();
+            }
+        } catch (err) { alert("Error adding product"); }
     }
 
-    function showTab(tabName) {
-        document.getElementById('orders-tab').classList.toggle('hidden', tabName !== 'orders');
-        document.getElementById('products-tab').classList.toggle('hidden', tabName !== 'products');
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.innerText.toLowerCase() === tabName));
-    }
-
-    async function fetchData() {
-        // Fetch Orders
-        const ordRes = await fetch(`${BACKEND_URL}/orders`);
-        const orders = await ordRes.json();
-        const ordList = document.getElementById('orders-list');
-        ordList.innerHTML = orders.map(o => `<tr><td>${o.customer_name}</td><td>${o.product_name}</td><td><button onclick="deleteOrder('${o.id}')">Delete</button></td></tr>`).join('');
-
-        // Fetch Products
-        const prodRes = await fetch(`${BACKEND_URL}/products`);
-        const products = await prodRes.json();
-        const prodList = document.getElementById('products-list');
-        prodList.innerHTML = products.map(p => `<tr><td>${p.name}</td><td>₹${p.price}</td><td>${p.stock}</td></tr>`).join('');
+    // 2. Fetch Orders
+    async function fetchOrders() {
+        const list = document.getElementById('orders-list');
+        try {
+            const response = await fetch(`${BACKEND_URL}/orders`);
+            const orders = await response.json();
+            list.innerHTML = "";
+            orders.forEach(order => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${order.customer_name}</strong></td>
+                    <td>${order.product_name}</td>
+                    <td>${order.phone || 'N/A'}</td>
+                    <td><button class="delete-btn" onclick="deleteOrder('${order.id}')">Delete</button></td>
+                `;
+                list.appendChild(row);
+            });
+        } catch (err) { list.innerHTML = "<tr><td colspan='4'>Server starting... please refresh.</td></tr>"; }
     }
 
     async function deleteOrder(id) {
-        if(confirm("Delete?")) {
-            await fetch(`${BACKEND_URL}/orders/${id}`, { method: 'DELETE' });
-            fetchData();
-        }
+        if(!confirm("Delete order?")) return;
+        await fetch(`${BACKEND_URL}/orders/${id}`, { method: 'DELETE' });
+        fetchOrders();
     }
+
+    fetchOrders();
 </script>
+
 </body>
 </html>
