@@ -44,6 +44,47 @@
         .wa-btn { background: var(--whatsapp) !important; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; }
     </style>
 </head>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        // Initialize Supabase
+        const supabase = supabase.createClient('YOUR_SUPABASE_URL', 'YOUR_SUPABASE_KEY');
+
+        // --- NEW WHATSAPP LOGIN SCRIPT ---
+        function loginViaWhatsApp() {
+            const phone = document.getElementById('user-phone').value;
+            if(!phone) return alert("Please enter your phone number");
+
+            const tempID = "SUB-" + Math.floor(Math.random() * 1000000);
+            const myWhatsApp = "91YOURNUMBER"; // Replace with your actual number
+            const waMsg = `Verify me for Subarna Apparel. ID: ${tempID} Phone: ${phone}`;
+            
+            window.open(`https://wa.me/${myWhatsApp}?text=${encodeURIComponent(waMsg)}`, '_blank');
+
+            // Save phone to browser memory
+            localStorage.setItem('subarna_user_id', phone);
+            alert("Verification started! You can now add items to your cart.");
+        }
+
+        // --- NEW ADD TO CART SCRIPT ---
+        async function addToCart(productId) {
+            const userPhone = localStorage.getItem('subarna_user_id');
+            
+            if (!userPhone) {
+                alert("Please login via WhatsApp first to save your cart!");
+                return;
+            }
+
+            const { error } = await supabase
+                .from('user_carts')
+                .insert([{ phone_number: userPhone, product_id: productId, quantity: 1 }]);
+
+            if (!error) {
+                alert("Saree added to your cloud cart!");
+            }
+        }
+    </script>
+</body>
 <body><div class="header" style="text-align: center; padding: 40px 20px; background: white; border-bottom: 1px solid #edf2f7;">
     <div class="leaf-logo">🍁</div>
     <h1 style="font-family: 'Playfair Display', serif; color: #1a202c; margin: 0; font-size: 2.5rem; letter-spacing: 1px;">Subarna Apparel</h1>
