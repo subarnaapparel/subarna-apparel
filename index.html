@@ -91,23 +91,31 @@
 
     // 2. WHATSAPP LOGIN LOGIC
     function loginViaWhatsApp() {
-        const phone = document.getElementById('user-phone').value;
-        if(!phone) {
-            alert("Please enter a phone number first.");
-            return;
-        }
-
-        const tempID = "SUB-" + Math.floor(Math.random() * 1000000);
-        const waMsg = `Hello Subarna! Please verify my account. \nPhone: ${phone} \nVerification ID: ${tempID}`;
-        
-        // This opens WhatsApp
-        window.open(`https://wa.me/${VENDOR_WHATSAPP}?text=${encodeURIComponent(waMsg)}`, '_blank');
-
-        // Store phone locally
-        localStorage.setItem('subarna_user_id', phone);
-        alert("WhatsApp opened! Your cart will now be saved under " + phone);
+    const phone = document.getElementById('user-phone').value;
+    if(!phone) {
+        alert("Please enter a phone number first.");
+        return;
     }
 
+    // 1. ENSURE YOUR NUMBER IS CORRECT: 
+    // Must be 91 followed by 10 digits. NO spaces, NO plus (+) sign.
+    const myWhatsApp = "91XXXXXXXXXX"; // <-- CHECK THIS CAREFULLY
+
+    const tempID = "SUB-" + Math.floor(Math.random() * 1000000);
+    const waMsg = `Hello Subarna! Please verify my account. Phone: ${phone} ID: ${tempID}`;
+    
+    // 2. THE FIX: Using a direct URL variable
+    const finalUrl = `https://wa.me/${myWhatsApp}?text=${encodeURIComponent(waMsg)}`;
+    
+    // 3. FORCE OPEN: Some browsers block window.open, so we use this:
+    const link = document.createElement('a');
+    link.href = finalUrl;
+    link.target = '_blank';
+    link.click();
+
+    // Store phone locally
+    localStorage.setItem('subarna_user_id', phone);
+}
     // 3. LOAD PRODUCTS
     async function loadData() {
         const grid = document.getElementById('product-grid');
