@@ -78,6 +78,15 @@ async def verify_payment(data: PaymentVerification):
         raise HTTPException(status_code=500, detail=str(e))
 
 # 6. Server Start Logic
+@app.post("/products")
+async def add_product(data: dict):
+    try:
+        # data will contain name, price, and image link
+        response = supabase.table("products").insert(data).execute()
+        return {"status": "success", "data": response.data}
+    except Exception as e:
+        print(f"Error adding product: {e}")
+        raise HTTPException(status_code=500, detail="Failed to add product")
 if __name__ == "__main__":
     import uvicorn
     import os
