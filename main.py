@@ -81,11 +81,11 @@ async def verify_payment(data: PaymentVerification):
 @app.post("/products")
 async def add_product(data: dict):
     try:
-        # data will contain name, price, and image link
+        # This will now accept name, price, image_url, and description
         response = supabase.table("products").insert(data).execute()
         return {"status": "success", "data": response.data}
     except Exception as e:
-        print(f"Error adding product: {e}")
+        print(f"Error: {e}")
         raise HTTPException(status_code=500, detail="Failed to add product")
         # --- DELETE ORDER ROUTE ---
 @app.delete("/orders/{order_id}")
