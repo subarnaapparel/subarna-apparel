@@ -56,78 +56,63 @@
     const SUPABASE_URL = "https://unzhgcjequbqblogktmc.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuemhnY2plcXVicWJsb2drdG1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MjA0NDcsImV4cCI6MjA5MTQ5NjQ0N30.cMl5AJAP686hfg7RPYlHgOcsYwPiadW-XqxYcne8sjs";
     
-    // REPLACE THIS WITH YOUR 10-DIGIT NUMBER (must start with 91)
-    const VENDOR_WHATSAPP = "919732493810"; 
+    // REPLACE the 0000000000 with your actual 10-digit mobile number
+    const MY_NUMBER = "919732493810"; 
 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // 2. WHATSAPP REDIRECT LOGIC 
+    // 2. WHATSAPP LOGIN
     function loginViaWhatsApp() {
         const phone = document.getElementById('user-phone').value;
         if(!phone || phone.length < 10) {
-            alert("Please enter a valid phone number.");
+            alert("Please enter your 10-digit phone number.");
             return;
         }
 
-        const tempID = "SUB-" + Math.floor(Math.random() * 1000000);
-        const waMsg = `Verify me for Subarna Apparel. \nPhone: ${phone} \nID: ${tempID}`;
-        
-        // Save to browser memory
+        // Save phone to memory for the cart
         localStorage.setItem('subarna_user_id', phone);
 
-        // Redirect directly
-        const waUrl = `https://api.whatsapp.com/send?phone=${VENDOR_WHATSAPP}&text=${encodeURIComponent(waMsg)}`;
+        const tempID = "SUB-" + Math.floor(Math.random() * 1000000);
+        const text = encodeURIComponent("Verify me for Subarna Apparel. ID: " + tempID);
+        
+        // FIXED LINK: No slashes between 'phone=' and the number
+        const waUrl = "https://api.whatsapp.com/send?phone=" + MY_NUMBER + "&text=" + text;
+        
         window.location.href = waUrl;
     }
 
-    // 3. LOAD DATA FROM SUPABASE
+    // 3. LOAD DATA
     async function loadData() {
         const grid = document.getElementById('product-grid');
         try {
             const { data, error } = await _supabase.from('products').select('*').order('created_at', { ascending: false });
             if (error) throw error;
-
-            grid.innerHTML = data.length ? "" : "No products available.";
+            grid.innerHTML = "";
             data.forEach(item => {
                 grid.innerHTML += `
                     <div class="card">
-                        <div class="image-box">
-                            <img src="${item.image_url || 'https://via.placeholder.com/400'}" alt="${item.name}">
-                        </div>
+                        <div class="image-box"><img src="${item.image_url || 'https://via.placeholder.com/400'}" alt="${item.name}"></div>
                         <div class="content">
-                            <h3 style="margin:0;">${item.name}</h3>
-                            <p style="color: #64748b; font-size: 14px;">${item.description || 'Bengal Traditional wear'}</p>
-                            <div class="price">₹${(item.price / 100).toLocaleString('en-IN')}</div>
-                            
-                            <button class="buy-btn" onclick="alert('Proceeding to Secure Payment...')">Buy Now</button>
+                            <h3>${item.name}</h3>
+                            <div class="price">₹${(item.price / 100)}</div>
+                            <button class="buy-btn" onclick="alert('Proceeding to Payment...')">Buy Now</button>
                             <button class="cart-btn" onclick="addToCart(${item.id})">Add to Cart</button>
                         </div>
                     </div>`;
             });
-        } catch (err) {
-            grid.innerHTML = "Error connecting: " + err.message;
-        }
+        } catch (err) { grid.innerHTML = "Error: " + err.message; }
     }
 
-    // 4. ADD TO CART LOGIC
+    // 4. ADD TO CART
     async function addToCart(productId) {
         const userPhone = localStorage.getItem('subarna_user_id');
         if (!userPhone) {
             alert("Please login via WhatsApp at the top first!");
-            window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
-
-        const { error } = await _supabase
-            .from('user_carts')
-            .insert([{ phone_number: userPhone, product_id: productId, quantity: 1 }]);
-
-        if (!error) {
-            alert("Success! Saree added to your cloud cart.");
-        } else {
-            console.error(error);
-            alert("Cart Error: Ensure the 'user_carts' table exists in Supabase.");
-        }
+        const { error } = await _supabase.from('user_carts').insert([{ phone_number: userPhone, product_id: productId, quantity: 1 }]);
+        if (!error) alert("Saree added to cart!");
+        else alert("Cart Error: " + error.message);
     }
 
     loadData();
