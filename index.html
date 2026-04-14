@@ -10,23 +10,53 @@
 
     <style>
         :root { --primary: #1a73e8; --dark: #0f172a; --bg: #f8fafc; --success: #2ecc71; --whatsapp: #25D366; }
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #334155; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 0; color: #334155; }
         
         /* Header */
-        .header { text-align: center; padding: 30px 20px; background: white; border-bottom: 1px solid #e2e8f0; }
-        .leaf-logo { font-size: 55px; display: inline-block; animation: sway 3.5s ease-in-out infinite; }
-        @keyframes sway { 0%, 100% { transform: rotate(-10deg); } 50% { transform: rotate(10deg); } }
+        .header { text-align: center; padding: 40px 20px; background: white; border-bottom: 1px solid #e2e8f0; }
+        .leaf-logo { font-size: 50px; display: inline-block; animation: sway 3s ease-in-out infinite; }
+        @keyframes sway { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
 
-        /* Auth Section */
-        .auth-card { max-width: 400px; margin: 20px auto; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
-        .auth-input { width: 80%; padding: 10px; margin-bottom: 10px; border: 1px solid #cbd5e0; border-radius: 6px; }
+        /* Auth Section - Ensuring visibility */
+        .auth-container { 
+            max-width: 450px; 
+            margin: 30px auto; 
+            padding: 25px; 
+            background: white; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
+            text-align: center;
+            border: 2px solid #e2e8f0;
+        }
+        .auth-input { 
+            width: 90%; 
+            padding: 12px; 
+            margin-bottom: 15px; 
+            border: 1px solid #cbd5e0; 
+            border-radius: 8px; 
+            font-size: 16px;
+        }
+        .wa-login-btn { 
+            background: var(--whatsapp); 
+            color: white; 
+            border: none; 
+            padding: 14px 25px; 
+            border-radius: 8px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            width: 95%;
+            font-size: 16px;
+            display: block;
+            margin: 0 auto;
+        }
 
-        /* Grid & Cards */
-        #product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; max-width: 1200px; margin: 40px auto; }
-        .card { background: white; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; display: flex; flex-direction: column; }
-        .image-box { width: 100%; height: 260px; position: relative; }
-        .image-box img { width: 100%; height: 100%; object-fit: cover; }
-        .content { padding: 20px; flex-grow: 1; }
+        /* Product Grid */
+        #product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .card { background: white; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .image-box img { width: 100%; height: 250px; object-fit: cover; }
+        .content { padding: 20px; }
+        .price { font-size: 1.4rem; font-weight: 800; margin-bottom: 15px; }
         
         .buy-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--dark); color: white; font-weight: 600; cursor: pointer; margin-bottom: 8px; }
         .cart-btn { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--dark); background: white; color: var(--dark); font-weight: 600; cursor: pointer; }
@@ -36,52 +66,56 @@
 
 <div class="header">
     <div class="leaf-logo">🍁</div>
-    <h1 style="font-family: serif;">Subarna Apparel</h1>
-    <p>Authentic West Bengal Collections</p>
+    <h1 style="margin:10px 0 5px 0;">Subarna Apparel</h1>
+    <p>Handpicked Saree Collections from West Bengal</p>
 </div>
 
-<div class="auth-card">
-    <h3>Welcome!</h3>
-    <input type="text" id="user-phone" class="auth-input" placeholder="Enter Phone (e.g. 9830000000)">
-    <button onclick="loginViaWhatsApp()" style="background: var(--whatsapp); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
+<div class="auth-container">
+    <h3 style="margin-top:0;">Secure Login</h3>
+    <p style="font-size: 14px; color: #64748b;">Enter your phone to sync your cart across devices.</p>
+    <input type="text" id="user-phone" class="auth-input" placeholder="Phone Number (e.g. 98300...)">
+    <button onclick="loginViaWhatsApp()" class="wa-login-btn">
         Verify via WhatsApp
     </button>
 </div>
 
-<div id="product-grid">Connecting to Marketplace...</div>
+<div id="product-grid">Loading Subarna Marketplace...</div>
 
 <script>
-    // 1. CONFIGURATION (Replace with your actual keys)
+    // 1. CONFIGURATION
     const SUPABASE_URL = "https://unzhgcjequbqblogktmc.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."; // Use your full key
-    const RAZORPAY_KEY_ID = "rzp_test_SZtMls47Of2XlG";
-    const BACKEND_URL = "https://subarna-apparel.onrender.com";
-    const VENDOR_WHATSAPP = "91XXXXXXXXXX"; // Your 10-digit number with 91
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuemhnY2plcXVicWJsb2drdG1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MjA0NDcsImV4cCI6MjA5MTQ5NjQ0N30.cMl5AJAP686hfg7RPYlHgOcsYwPiadW-XqxYcne8sjs";
+    const VENDOR_WHATSAPP = "91XXXXXXXXXX"; // REPLACE WITH YOUR 10-DIGIT NUMBER
 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // 2. WHATSAPP LOGIN
+    // 2. WHATSAPP LOGIN LOGIC
     function loginViaWhatsApp() {
         const phone = document.getElementById('user-phone').value;
-        if(!phone) return alert("Please enter your phone number");
+        if(!phone) {
+            alert("Please enter a phone number first.");
+            return;
+        }
 
         const tempID = "SUB-" + Math.floor(Math.random() * 1000000);
-        const waMsg = `Verify me for Subarna Apparel. ID: ${tempID} Phone: ${phone}`;
+        const waMsg = `Hello Subarna! Please verify my account. \nPhone: ${phone} \nVerification ID: ${tempID}`;
         
+        // This opens WhatsApp
         window.open(`https://wa.me/${VENDOR_WHATSAPP}?text=${encodeURIComponent(waMsg)}`, '_blank');
 
+        // Store phone locally
         localStorage.setItem('subarna_user_id', phone);
-        alert("Verification message sent! You can now use your cart.");
+        alert("WhatsApp opened! Your cart will now be saved under " + phone);
     }
 
-    // 3. LOAD DATA
+    // 3. LOAD PRODUCTS
     async function loadData() {
         const grid = document.getElementById('product-grid');
         try {
             const { data, error } = await _supabase.from('products').select('*').order('created_at', { ascending: false });
             if (error) throw error;
 
-            grid.innerHTML = "";
+            grid.innerHTML = data.length ? "" : "No products found.";
             data.forEach(item => {
                 grid.innerHTML += `
                     <div class="card">
@@ -89,43 +123,38 @@
                             <img src="${item.image_url || 'https://via.placeholder.com/400'}" alt="${item.name}">
                         </div>
                         <div class="content">
-                            <h3>${item.name}</h3>
-                            <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 15px;">₹${(item.price / 100)}</div>
+                            <h3 style="margin:0;">${item.name}</h3>
+                            <p style="color: #64748b; font-size: 14px;">${item.description || 'Traditional Bengal Wear'}</p>
+                            <div class="price">₹${(item.price / 100).toLocaleString('en-IN')}</div>
                             
-                            <button class="buy-btn" onclick="initiatePayment(${item.id}, ${item.price}, '${item.name}')">Buy Now</button>
+                            <button class="buy-btn">Buy Now</button>
                             <button class="cart-btn" onclick="addToCart(${item.id})">Add to Cart</button>
                         </div>
                     </div>`;
             });
-        } catch (err) { grid.innerHTML = "Error: " + err.message; }
+        } catch (err) {
+            grid.innerHTML = "Connection Error: " + err.message;
+        }
     }
 
-    // 4. ADD TO CART
+    // 4. CART LOGIC
     async function addToCart(productId) {
         const userPhone = localStorage.getItem('subarna_user_id');
-        if (!userPhone) return alert("Please login via WhatsApp first!");
+        if (!userPhone) {
+            alert("Please use the 'Verify via WhatsApp' section at the top to login first!");
+            return;
+        }
 
         const { error } = await _supabase
             .from('user_carts')
             .insert([{ phone_number: userPhone, product_id: productId, quantity: 1 }]);
 
-        if (!error) alert("Added to your cloud cart!");
-        else alert("Error: Make sure 'user_carts' table exists in Supabase");
-    }
-
-    // 5. PAYMENT (Razorpay)
-    function initiatePayment(productId, amount, productName) {
-        const options = {
-            "key": RAZORPAY_KEY_ID,
-            "amount": amount,
-            "currency": "INR",
-            "name": "Subarna Apparel",
-            "handler": async function (response) {
-                alert("Payment Success! ID: " + response.razorpay_payment_id);
-                // Trigger your backend verification here if needed
-            }
-        };
-        new Razorpay(options).open();
+        if (!error) {
+            alert("Saree added to your cloud cart!");
+        } else {
+            console.error(error);
+            alert("Could not add to cart. Please check your connection.");
+        }
     }
 
     loadData();
