@@ -87,6 +87,25 @@ async def add_product(data: dict):
     except Exception as e:
         print(f"Error adding product: {e}")
         raise HTTPException(status_code=500, detail="Failed to add product")
+        # --- DELETE ORDER ROUTE ---
+@app.delete("/orders/{order_id}")
+async def delete_order(order_id: str):
+    try:
+        supabase.table("orders").delete().eq("id", order_id).execute()
+        return {"status": "success", "message": "Order deleted"}
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to delete order")
+
+# --- DELETE PRODUCT ROUTE ---
+@app.delete("/products/{product_id}")
+async def delete_product(product_id: int):
+    try:
+        supabase.table("products").delete().eq("id", product_id).execute()
+        return {"status": "success", "message": "Product deleted"}
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to delete product")
 if __name__ == "__main__":
     import uvicorn
     import os
