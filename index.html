@@ -61,7 +61,7 @@
 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // 2. WHATSAPP REDIRECT LOGIC
+    // 2. WHATSAPP REDIRECT LOGIC 
     function loginViaWhatsApp() {
         const phone = document.getElementById('user-phone').value;
         if(!phone || phone.length < 10) {
