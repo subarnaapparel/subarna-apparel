@@ -2,114 +2,88 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subarna Admin - Manage Store</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <title>Subarna Admin - Full Control</title>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f7fafc; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .form-section { border-bottom: 2px solid #edf2f7; margin-bottom: 30px; padding-bottom: 20px; }
-        input { padding: 10px; margin: 5px; border: 1px solid #cbd5e0; border-radius: 6px; }
-        .btn-add { background: #48bb78; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 12px; background: #edf2f7; }
-        td { padding: 12px; border-bottom: 1px solid #edf2f7; }
-        .delete-btn { background: #e53e3e; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; }
+        body { font-family: sans-serif; background: #f4f7f6; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+        .del-btn { background: #ff4444; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; }
+        .add-btn { background: #28a745; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1 style="font-family: 'Playfair Display', serif;">Subarna Inventory Manager</h1>
-
-    <div class="form-section">
-        <h3>Add New Product</h3>
-        <div class="container" style="margin-top: 20px;">
-    <h3>Current Shop Inventory</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Product Name</th>
-                <th>Price</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="inventory-list">
-            </tbody>
-    </table>
-</div>
-        <input type="text" id="p-name" placeholder="Product Name (e.g. Silk Saree)">
-        <input type="text" id="p-price" placeholder="Price (e.g. 1200)">
+    <div class="card">
+        <h2>Add New Product</h2>
+        <input type="text" id="p-name" placeholder="Name">
+        <input type="number" id="p-price" placeholder="Price">
         <input type="text" id="p-img" placeholder="Image URL">
-        <button class="btn-add" onclick="addProduct()">Add to Shop</button>
+        <button class="add-btn" onclick="addProduct()">Add to Shop</button>
     </div>
 
-    <h3>Customer Orders</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Customer</th>
-                <th>Product</th>
-                <th>Phone</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="orders-list"></tbody>
-    </table>
-</div>
+    <div class="card">
+        <h2>Current Inventory (Delete Products Here)</h2>
+        <table>
+            <thead><tr><th>Product</th><th>Price</th><th>Action</th></tr></thead>
+            <tbody id="inventory-list"></tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>Customer Orders</h2>
+        <table>
+            <thead><tr><th>Customer</th><th>Product</th><th>Action</th></tr></thead>
+            <tbody id="orders-list"></tbody>
+        </table>
+    </div>
 
 <script>
     const BACKEND_URL = "https://subarna-apparel.onrender.com";
 
-    // 1. Function to Add Product
+    async function loadData() {
+        // Load Products
+        const pRes = await fetch(`${BACKEND_URL}/products`);
+        const products = await pRes.json();
+        document.getElementById('inventory-list').innerHTML = products.map(p => `
+            <tr>
+                <td>${p.name}</td>
+                <td>₹${p.price}</td>
+                <td><button class="del-btn" onclick="deleteItem('products', ${p.id})">Delete Product</button></td>
+            </tr>
+        `).join('');
+
+        // Load Orders
+        const oRes = await fetch(`${BACKEND_URL}/orders`);
+        const orders = await oRes.json();
+        document.getElementById('orders-list').innerHTML = orders.map(o => `
+            <tr>
+                <td>${o.customer_name}</td>
+                <td>${o.product_name}</td>
+                <td><button class="del-btn" onclick="deleteItem('orders', '${o.id}')">Delete Order</button></td>
+            </tr>
+        `).join('');
+    }
+
+    async function deleteItem(type, id) {
+        if(!confirm(`Delete this ${type.slice(0,-1)}?`)) return;
+        await fetch(`${BACKEND_URL}/${type}/${id}`, { method: 'DELETE' });
+        loadData();
+    }
+
     async function addProduct() {
         const name = document.getElementById('p-name').value;
         const price = document.getElementById('p-price').value;
-        const image = document.getElementById('p-img').value;
-
-        if(!name || !price) return alert("Please fill Name and Price");
-
-        try {
-            const response = await fetch(`${BACKEND_URL}/products`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, price, image_url: image })
-            });
-            if(response.ok) {
-                alert("Product Added Successfully!");
-                location.reload();
-            }
-        } catch (err) { alert("Error adding product"); }
+        const image_url = document.getElementById('p-img').value;
+        await fetch(`${BACKEND_URL}/products`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ name, price, image_url })
+        });
+        loadData();
     }
 
-    // 2. Fetch Orders
-    async function fetchOrders() {
-        const list = document.getElementById('orders-list');
-        try {
-            const response = await fetch(`${BACKEND_URL}/orders`);
-            const orders = await response.json();
-            list.innerHTML = "";
-            orders.forEach(order => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><strong>${order.customer_name}</strong></td>
-                    <td>${order.product_name}</td>
-                    <td>${order.phone || 'N/A'}</td>
-                    <td><button class="delete-btn" onclick="deleteOrder('${order.id}')">Delete</button></td>
-                `;
-                list.appendChild(row);
-            });
-        } catch (err) { list.innerHTML = "<tr><td colspan='4'>Server starting... please refresh.</td></tr>"; }
-    }
-
-    async function deleteOrder(id) {
-        if(!confirm("Delete order?")) return;
-        await fetch(`${BACKEND_URL}/orders/${id}`, { method: 'DELETE' });
-        fetchOrders();
-    }
-
-    fetchOrders();
+    loadData();
 </script>
-
 </body>
 </html>
