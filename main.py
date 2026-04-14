@@ -107,6 +107,30 @@ async def delete_product(product_id: int):
     except Exception as e:
         print(f"Error: {e}")
         raise HTTPException(status_code=500, detail="Failed to delete product")
+        # --- GET ALL PRODUCTS ---
+@app.get("/products")
+async def get_products():
+    response = supabase.table("products").select("*").execute()
+    return response.data
+
+# --- ADD NEW PRODUCT (Including Description) ---
+@app.post("/products")
+async def add_product(data: dict):
+    try:
+        # This will save the name, price, image_url, and description [cite: 5, 6, 7, 8]
+        response = supabase.table("products").insert(data).execute()
+        return {"status": "success", "data": response.data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# --- DELETE PRODUCT ---
+@app.delete("/products/{product_id}")
+async def delete_product(product_id: int):
+    try:
+        supabase.table("products").delete().eq("id", product_id).execute()
+        return {"status": "success"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 if __name__ == "__main__":
     import uvicorn
     import os
