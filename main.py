@@ -98,15 +98,15 @@ async def delete_order(order_id: str):
         raise HTTPException(status_code=500, detail="Failed to delete order")
 
 # --- DELETE PRODUCT ROUTE ---
-@app.delete("/orders/{order_id}")
-async def delete_order(order_id: str):
-    supabase.table("orders").delete().eq("id", order_id).execute()
-    return {"status": "success"}
-
 @app.delete("/products/{product_id}")
 async def delete_product(product_id: int):
-    supabase.table("products").delete().eq("id", product_id).execute()
-    return {"status": "success"}
+    try:
+        # This is the "Engine" that actually removes the item from Supabase
+        supabase.table("products").delete().eq("id", product_id).execute()
+        return {"status": "success", "message": "Product deleted"}
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to delete product")
 if __name__ == "__main__":
     import uvicorn
     import os
